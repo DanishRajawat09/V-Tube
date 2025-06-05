@@ -10,8 +10,11 @@
   "license": "ISC",
   "author": "danishRajawat",
   "type": "module",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+"dev" : "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
