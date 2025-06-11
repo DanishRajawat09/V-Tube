@@ -13,7 +13,7 @@ if (!token) {
     throw new ApiError(401 , "Unauthorized request")
 }
 
-  const decoded = jwt.verify(token , ACCESS_TOKEN_SECRET)
+  let decoded = jwt.verify(token , ACCESS_TOKEN_SECRET)
 
  const user =   await User.findById(decoded?._id).select("-password -refreshtoken")
 

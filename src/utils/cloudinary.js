@@ -22,7 +22,7 @@ const uploadOnCloud = async (localFilePath) => {
     });
 
     console.log("file is uploaded on cloudinary", res.url);
-
+ fs.unlinkSync(localFilePath);
     return res;
   } catch (error) {
     fs.unlinkSync(localFilePath);
@@ -30,5 +30,20 @@ const uploadOnCloud = async (localFilePath) => {
     return null;
   }
 };
+const deleteAssetOnCloudinary = async (filepath) => {
+    try {
+        if (!filepath) {
+            return null
+        }
 
-export { uploadOnCloud };
+      return await cloudinary.uploader.destroy(filepath)
+
+        
+    } catch (error) {
+        console.log(error);
+        
+    }
+}
+
+
+export {deleteAssetOnCloudinary , uploadOnCloud}

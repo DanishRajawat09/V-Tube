@@ -34,11 +34,22 @@ const userSchema = new mongoose.Schema(
       index: true,
     },
     avatar: {
-      type: String, // cloudinary
-      required: true,
+      url: {
+        type: String,
+        required: true,
+      },
+      publicId: {
+        type: String,
+        required: true,
+      },
     },
     coverimage: {
-      type: String, // cloudinary
+  url : {
+        type: String, // cloudinary
+  },
+  publicId : {
+        type: String, // cloudinary
+  }
     },
     password: {
       type: String,
@@ -64,7 +75,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.isPasswordCorrect = async function(password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
