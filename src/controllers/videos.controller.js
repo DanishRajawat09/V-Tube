@@ -173,21 +173,41 @@ const updateVideo = asyncHandler(async (req, res) => {
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
-  const {videoId} = req.params
+  const { videoId } = req.params;
 
-   if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
+  if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
     throw new ApiError(400, "invalid video id");
   }
 
-  const video = await Video.findByIdAndDelete(videoId)
+  const video = await Video.findByIdAndDelete(videoId);
 
   if (!video) {
-    throw new ApiError(500 , "file not deleted")
+    throw new ApiError(500, "file not deleted");
   }
-res.status(200).json(
-  new ApiResponse(200 , {} ,"file deleted successfully ")
-)
+  res.status(200).json(new ApiResponse(200, {}, "file deleted successfully "));
+});
+const togglePublish = asyncHandler(async (req, res) => {
+  const {videoId} = req.params
+
+  if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "invalid video id");
+  }
+
+ const video = await Video.findById(videoId)
+
+ if (!video) {
+  throw new ApiError(500 , "video not found in database")
+ }
+ video.ispublished = !video.ispublished
+ await video.save({validateBeforeSave : false})
+
+// await Video.findByIdAndUpdate(videoId, { $bit: { ispublished: { xor: 1 } } });
+
+
+ res.status(200).json(
+  new ApiResponse(200 , video , "toggle isPublished successfully")
+ )
+
 
 });
-
-export { getVideos, publishVideo, getVideoById, updateVideo , deleteVideo};
+export { getVideos, publishVideo, getVideoById, updateVideo, deleteVideo , togglePublish};
