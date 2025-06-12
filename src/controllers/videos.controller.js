@@ -105,27 +105,71 @@ const publishVideo = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(201, video, "video created successfully"));
 });
-const getVideoById = asyncHandler(async (req ,res) => {
-    const {videoId} = req.params
+const getVideoById = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
 
+  if (!videoId) {
+    throw new ApiError(400, "video id not found");
+  }
 
-    if (!videoId) {
-        throw new ApiError(400 ,"video id not found" )
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "Invalid video ID format");
+  }
+
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new ApiError(500, "video not found in database");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, video, "fetched video by id successfully"));
+});
+
+const updateVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "invalid video id");
+  }
+
+  const { title, description } = req.body;
+
+  const thumbnailLocalPath = req?.file?.path;
+
+  let thumbnail;
+
+  const updateVal = {};
+
+  if (thumbnailLocalPath) {
+    thumbnail = await uploadOnCloud(thumbnailLocalPath);
+
+    if (thumbnail.url) {
+      updateVal.thumbnail = thumbnail.url;
     }
+  }
 
-    if (!mongoose.Types.ObjectId.isValid(videoId)) {
-  throw new ApiError(400, "Invalid video ID format");
-}
+  if (title) {
+    updateVal.title = title;
+  }
+  if (description) {
+    updateVal.description = description;
+  }
 
-    const video = await Video.findById(videoId)
+  const video = await Video.findByIdAndUpdate(
+    videoId,
+    { $set: updateVal },
+    { new: true }
+  );
 
-    if (!video) {
-        throw new ApiError(500 , "video not found in database")
-    }
+  if (!video) {
+    throw new ApiError(500, "process failed while updating database");
+  }
 
-    res.status(200).json(
-        new ApiResponse(200 , video , "fetched video by id successfully")
-    )
-})
+  res
+    .status(200)
+    .json(new ApiResponse(200, video, "video updated successfully"));
+});
 
-export { getVideos, publishVideo , getVideoById };
+export { getVideos, publishVideo, getVideoById, updateVideo };

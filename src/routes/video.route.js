@@ -1,21 +1,33 @@
 import { Router } from "express";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
-import { getVideoById, getVideos, publishVideo } from "../controllers/videos.controller.js";
-import {upload} from "../middlewares/multer.middleware.js"
-const router = Router()
+import {
+  getVideoById,
+  getVideos,
+  publishVideo,
+  updateVideo,
+} from "../controllers/videos.controller.js";
+import { upload } from "../middlewares/multer.middleware.js";
+const router = Router();
 
-router.route("/").get(verifyJwt , getVideos)
+router.route("/").get(verifyJwt, getVideos);
 
-router.route("/").post(verifyJwt ,  
-    upload.fields([
-        {
-            name : "video",
-            maxCount : 1
-        },{
-            name : "thumbnail",
-            maxCount : 1
-        }
-    ]), publishVideo)
+router.route("/").post(
+  verifyJwt,
+  upload.fields([
+    {
+      name: "video",
+      maxCount: 1,
+    },
+    {
+      name: "thumbnail",
+      maxCount: 1,
+    },
+  ]),
+  publishVideo
+);
 
-    router.route("/:videoId").get(verifyJwt , getVideoById)
-export default router
+router.route("/:videoId").get(verifyJwt, getVideoById);
+router
+  .route("/update-video/:videoId")
+  .patch(verifyJwt, upload.single("thumbnail"), updateVideo);
+export default router;
