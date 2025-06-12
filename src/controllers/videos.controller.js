@@ -129,6 +129,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+  const userId = req.user?._id
 
   if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
     throw new ApiError(400, "invalid video id");
@@ -157,11 +158,16 @@ const updateVideo = asyncHandler(async (req, res) => {
     updateVal.description = description;
   }
 
-  const video = await Video.findByIdAndUpdate(
-    videoId,
-    { $set: updateVal },
-    { new: true }
-  );
+ const video = await Video.findOneAndUpdate(
+  {
+    $and: [
+      { _id: videoId },
+      { owner: userId }
+    ]
+  },
+  { $set: updateVal },
+  { new: true }
+);
 
   if (!video) {
     throw new ApiError(500, "process failed while updating database");
@@ -174,12 +180,16 @@ const updateVideo = asyncHandler(async (req, res) => {
 
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-
+const userId = req.user._id
   if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
     throw new ApiError(400, "invalid video id");
   }
 
-  const video = await Video.findByIdAndDelete(videoId);
+ const video = await Video.findOneAndDelete({
+  _id: videoId,
+  owner: userId,
+});
+
 
   if (!video) {
     throw new ApiError(500, "file not deleted");
@@ -188,15 +198,15 @@ const deleteVideo = asyncHandler(async (req, res) => {
 });
 const togglePublish = asyncHandler(async (req, res) => {
   const {videoId} = req.params
-
+const userId = req.user._id
   if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
     throw new ApiError(400, "invalid video id");
   }
 
- const video = await Video.findById(videoId)
+ const video = await Video.findOne({$and : [{_id : videoId} , {owner : userId}]})
 
  if (!video) {
-  throw new ApiError(500 , "video not found in database")
+  throw new ApiError(404 , "video not found in database")
  }
  video.ispublished = !video.ispublished
  await video.save({validateBeforeSave : false})
